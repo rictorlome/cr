@@ -1,19 +1,28 @@
+mod cli;
+use cli::Cli;
+use cr::rules::{generate_rules, Rules};
+
 use anyhow::Result;
-
 use clap::Parser;
-use cr::config::Config;
+use std::fs::File;
+use std::path::PathBuf;
 
-fn main() -> Result<()> {
-    let args = Config::parse();
-    println!("Args: {:?}", args);
-    match cr::replace(&args) {
-        Ok(_) => {
-            println!("Success!");
-            Ok(())
+fn replace_to_stdout(path: &Option<PathBuf>, rules: &Rules) -> Result<()> {
+    let write = std::io::stdout();
+    match path {
+        Some(path) => {
+            let read = File::open(&path)?;
+            cr::read_replace_write(read, write, rules)
         }
-        Err(e) => {
-            println!("Error: {:?}", e);
-            Err(e)
+        None => {
+            let read = std::io::stdin();
+            cr::read_replace_write(read, write, rules)
         }
     }
+}
+
+fn main() -> Result<()> {
+    let args = Cli::parse();
+    let rules = generate_rules(&args.from, &args.to);
+    replace_to_stdout(&args.path, &rules)
 }

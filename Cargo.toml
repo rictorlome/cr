@@ -9,4 +9,3 @@ description = "A small tool to replace names in files, respecting the case."
 [dependencies]
 anyhow = "1.0"
 clap = { version = "3.2.20", features = ["derive"] }
-tempfile = "3"
